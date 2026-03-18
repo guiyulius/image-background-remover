@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RemoveBG Pro - AI 图片背景去除</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .upload-area { border: 2px dashed #3b82f6; transition: all 0.3s ease; }
+        .upload-area.dragover { border-color: #1d4ed8; background-color: #eff6ff; }
+        .compare-slider { position: relative; overflow: hidden; }
+        .compare-before { clip-path: polygon(0 0, var(--position, 50%) 0, var(--position, 50%) 100%, 0 100%); }
+        .compare-handle { position: absolute; top: 0; bottom: 0; width: 2px; background: #3b82f6; cursor: ew-resize; left: var(--position, 50%); transform: translateX(-50%); }
+        .compare-handle::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 30px; height: 30px; background: #3b82f6; border-radius: 50%; border: 2px solid white; }
+        .compare-handle::after { content: '◀ ▶'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 10px; font-weight: bold; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .checkerboard { background: linear-gradient(45deg, #eee 25%, transparent 25%), linear-gradient(-45deg, #eee 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #eee 75%), linear-gradient(-45deg, transparent 75%, #eee 75%), #fff; background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <span class="text-xl font-bold text-gray-800">RemoveBG Pro</span>
+                </div>
+                <span class="text-sm text-gray-500">AI 智能图片背景去除</span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 py-12">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">一键去除图片背景</h1>
+            <p class="text-xl text-gray-600">AI 驱动，精准抠图</p>
+        </div>
+
+        <div id="upload-section">
+            <div id="upload-area" class="upload-area bg-white rounded-2xl p-12 text-center cursor-pointer">
+                <div class="mb-4">
+                    <svg class="w-16 h-16 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">拖拽图片到此处</h3>
+                <p class="text-gray-500 mb-4">或点击选择文件</p>
+                <p class="text-sm text-gray-400">支持 JPG、PNG、WEBP，最大 10MB</p>
+                <input type="file" id="file-input" class="hidden" accept="image/jpeg,image/png,image/webp">
+            </div>
+        </div>
+
+        <div id="processing-section" class="hidden text-center py-12">
+            <div class="spinner mx-auto mb-4"></div>
+            <p class="text-lg text-gray-600">AI 正在抠图...</p>
+            <p class="text-sm text-gray-400 mt-2">请稍候</p>
+        </div>
+
+        <div id="result-section" class="hidden">
+            <div class="bg-white rounded-2xl shadow-lg p-8">
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">前后对比</h3>
+                    <div id="compare-container" class="compare-slider relative rounded-xl overflow-hidden" style="--position: 50%;">
+                        <div id="result-container" class="checkerboard">
+                        <img id="result-image" class="w-full h-auto" alt="处理结果">
+                        </div>
+                        <img id="original-image" class="compare-before absolute top-0 left-0 w-full h-auto" alt="原图">
+                        <div id="compare-handle" class="compare-handle"></div>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">背景颜色</h3>
+                    <div class="flex flex-wrap gap-4">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="bg-color" value="transparent" class="sr-only" checked>
+                            <div class="bg-picker w-12 h-12 rounded-lg border-2 border-blue-500" style="background: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%), white; background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px;"></div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="bg-color" value="#ffffff" class="sr-only">
+                            <div class="bg-picker w-12 h-12 rounded-lg border-2 border-gray-300" style="background-color: #ffffff;"></div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="bg-color" value="#0066cc" class="sr-only">
+                            <div class="bg-picker w-12 h-12 rounded-lg border-2 border-gray-300" style="background-color: #0066cc;"></div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="bg-color" value="#ff0000" class="sr-only">
+                            <div class="bg-picker w-12 h-12 rounded-lg border-2 border-gray-300" style="background-color: #ff0000;"></div>
+                        </label>
+                        <label class="cursor-pointer flex items-center">
+                            <input type="color" id="custom-color" value="#667eea" class="w-12 h-12 rounded-lg border-2 border-gray-300 cursor-pointer">
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-4">
+                    <button id="download-btn" class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                        <span class="flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            下载图片
+                        </span>
+                    </button>
+                    <button id="reupload-btn" class="bg-gray-100 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
+                        继续处理
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="error-section" class="hidden text-center py-12">
+            <div class="bg-red-50 rounded-2xl p-8">
+                <svg class="w-16 h-16 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h3 class="text-xl font-semibold text-red-800 mb-2">处理失败</h3>
+                <p id="error-message" class="text-red-600 mb-4">请重试</p>
+                <button id="retry-btn" class="bg-red-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-red-700 transition-colors">
+                    重试
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentFile = null;
+        let resultBlob = null;
+
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const uploadSection = document.getElementById('upload-section');
+        const processingSection = document.getElementById('processing-section');
+        const resultSection = document.getElementById('result-section');
+        const errorSection = document.getElementById('error-section');
+        const originalImage = document.getElementById('original-image');
+        const resultImage = document.getElementById('result-image');
+        const resultContainer = document.getElementById('result-container');
+        const compareContainer = document.getElementById('compare-container');
+        const compareHandle = document.getElementById('compare-handle');
+        const downloadBtn = document.getElementById('download-btn');
+        const reuploadBtn = document.getElementById('reupload-btn');
+        const retryBtn = document.getElementById('retry-btn');
+        const errorMessage = document.getElementById('error-message');
+        const customColor = document.getElementById('custom-color');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                showError('请上传 JPG、PNG 或 WEBP 格式的图片');
+                return;
+            }
+            
+            if (file.size > 10 * 1024 * 1024) {
+                showError('图片大小不能超过 10MB');
+                return;
+            }
+            
+            currentFile = file;
+            processImage(file, getSelectedBgColor());
+        }
+
+        function processImage(file, bgColor) {
+            showProcessing();
+            
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('bg_color', bgColor);
+            
+            fetch('/api/remove-bg', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.error || '处理失败');
+                    });
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                resultBlob = blob;
+                const resultUrl = URL.createObjectURL(blob);
+                const originalUrl = URL.createObjectURL(file);
+                
+                originalImage.src = originalUrl;
+                resultImage.src = resultUrl;
+                
+                if (bgColor === 'transparent') {
+                    resultContainer.classList.add('checkerboard');
+                } else {
+                    resultContainer.classList.remove('checkerboard');
+                    resultContainer.style.backgroundColor = bgColor;
+                }
+                
+                showResult();
+            })
+            .catch(err => {
+                showError(err.message);
+            });
+        }
+
+        function getSelectedBgColor() {
+            const selected = document.querySelector('input[name="bg-color"]:checked');
+            if (selected) {
+                return selected.value;
+            }
+            return customColor.value;
+        }
+
+        document.querySelectorAll('input[name="bg-color"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                if (currentFile) {
+                    processImage(currentFile, getSelectedBgColor());
+                }
+            });
+        });
+
+        customColor.addEventListener('input', () => {
+            if (currentFile) {
+                processImage(currentFile, customColor.value);
+            }
+        });
+
+        let isDragging = false;
+        
+        function updateSliderPosition(e) {
+            const rect = compareContainer.getBoundingClientRect();
+            let x = (e.clientX || e.touches[0].clientX) - rect.left;
+            x = Math.max(0, Math.min(x, rect.width));
+            const percent = (x / rect.width) * 100;
+            compareContainer.style.setProperty('--position', `${percent}%`);
+        }
+        
+        compareHandle.addEventListener('mousedown', () => isDragging = true);
+        compareHandle.addEventListener('touchstart', () => isDragging = true);
+        
+        document.addEventListener('mouseup', () => isDragging = false);
+        document.addEventListener('touchend', () => isDragging = false);
+        
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) updateSliderPosition(e);
+        });
+        
+        document.addEventListener('touchmove', (e) => {
+            if (isDragging) updateSliderPosition(e);
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            if (resultBlob) {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(resultBlob);
+                const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                a.download = `removebg_${timestamp}.png`;
+                a.click();
+            }
+        });
+
+        reuploadBtn.addEventListener('click', () => {
+            resetState();
+        });
+
+        retryBtn.addEventListener('click', () => {
+            if (currentFile) {
+                processImage(currentFile, getSelectedBgColor());
+            } else {
+                resetState();
+            }
+        });
+
+        function showProcessing() {
+            uploadSection.classList.add('hidden');
+            resultSection.classList.add('hidden');
+            errorSection.classList.add('hidden');
+            processingSection.classList.remove('hidden');
+        }
+
+        function showResult() {
+            uploadSection.classList.add('hidden');
+            processingSection.classList.add('hidden');
+            errorSection.classList.add('hidden');
+            resultSection.classList.remove('hidden');
+        }
+
+        function showError(message) {
+            uploadSection.classList.add('hidden');
+            processingSection.classList.add('hidden');
+            resultSection.classList.add('hidden');
+            errorSection.classList.remove('hidden');
+            errorMessage.textContent = message;
+        }
+
+        function resetState() {
+            currentFile = null;
+            resultBlob = null;
+            fileInput.value = '';
+            uploadSection.classList.remove('hidden');
+            processingSection.classList.add('hidden');
+            resultSection.classList.add('hidden');
+            errorSection.classList.add('hidden');
+        }
+
+        function updateBgPickerSelection() {
+            document.querySelectorAll('.bg-picker').forEach(el => {
+                el.classList.remove('border-blue-500');
+                el.classList.add('border-gray-300');
+            });
+            
+            const selected = document.querySelector('input[name="bg-color"]:checked');
+            if (selected && selected.nextElementSibling) {
+                selected.nextElementSibling.classList.remove('border-gray-300');
+                selected.nextElementSibling.classList.add('border-blue-500');
+            }
+        }
+
+        document.querySelectorAll('input[name="bg-color"]').forEach(radio => {
+            radio.addEventListener('change', updateBgPickerSelection);
+        });
+
+        updateBgPickerSelection();
+    </script>
+</body>
+</html>
