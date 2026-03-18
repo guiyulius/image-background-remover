@@ -50,6 +50,6 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ error: error.message || 'Internal server error' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
-    };
+    });
   }
 }
