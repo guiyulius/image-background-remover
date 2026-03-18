@@ -1,18 +1,19 @@
 {
   "name": "bg-remover",
   "version": "1.0.0",
-  "description": "",
+  "description": "AI-powered image background remover",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "cors": "^2.8.6",
-    "express": "^5.2.1",
-    "multer": "^2.1.1"
-  }
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "form-data": "^4.0.2",
+    "multer": "^1.4.5-lts.1"
+  },
+  "keywords": ["background-remover", "ai", "image-processing"],
+  "author": "",
+  "license": "MIT"
 }
