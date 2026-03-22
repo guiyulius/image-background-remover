@@ -5,13 +5,20 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "pages:dev": "wrangler pages dev .",
+    "pages:deploy": "wrangler pages deploy ."
   },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "form-data": "^4.0.2",
-    "multer": "^1.4.5-lts.1"
+    "multer": "^1.4.5-lts.1",
+    "@auth/core": "^0.34.2",
+    "@auth/d1-adapter": "^0.34.2"
+  },
+  "devDependencies": {
+    "wrangler": "^3.78.0"
   },
   "keywords": ["background-remover", "ai", "image-processing"],
   "author": "",

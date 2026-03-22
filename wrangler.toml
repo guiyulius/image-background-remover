@@ -9,3 +9,14 @@ publish = "."
 from = "/*"
 to = "/index.html"
 status = 200
+
+[vars]
+AUTH_SECRET = "generate-a-random-secret-here-please-change-in-production"
+AUTH_URL = "https://imagebackgroundcleaning.shop"
+AUTH_TRUST_HOST = "true"
+# GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET should be set in Cloudflare Pages env vars
+# not in this file for security reasons
+
+# [d1_databases]
+# database_name = "image-bg-remover-auth"
+# database_id = "YOUR_DATABASE_ID_HERE"
