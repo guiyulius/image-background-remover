@@ -1,9 +1,6 @@
 name = "image-background-remover"
 compatibility_date = "2024-03-18"
-
-[build]
-command = ""
-publish = "."
+pages_build_output_dir = "."
 
 [[redirects]]
 from = "/*"
