@@ -70,16 +70,16 @@ AUTH_SECRET = 9762f772f0308a05d9f7d569518e27ddb4b67460bc98a97b81f0e97df63d4839
    AUTH_SECRET = 9762f772f0308a05d9f7d569518e27ddb4b67460bc98a97b81f0e97df63d4839
    ```
 
-### 阶段 4: 环境变量配置（进行中 🚧）
+### 阶段 4: 环境变量配置（部分完成 ⏳）
 
 在 Cloudflare Dashboard 中配置：
 
 5. **设置 Cloudflare Pages 环境变量**
    - ✅ `AUTH_SECRET` - 已通过 wrangler 设置
-   - ⏳ `AUTH_URL` - 需在 Dashboard 中设置为 `https://imagebackgroundcleaning.shop`
-   - ⏳ `AUTH_TRUST_HOST` - 需在 Dashboard 中设置为 `true`
-   - 🔒 `GOOGLE_CLIENT_ID` - 需用户提供并在 Dashboard 中设置
-   - 🔒 `GOOGLE_CLIENT_SECRET` - 需用户提供并在 Dashboard 中设置
+   - ⏳ `AUTH_URL` - 需在 Dashboard 中设置为 `https://imagebackgroundcleaning.shop`（非敏感变量）
+   - ⏳ `AUTH_TRUST_HOST` - 需在 Dashboard 中设置为 `true`（非敏感变量）
+   - ✅ `GOOGLE_CLIENT_ID` - 已通过 wrangler 设置
+   - ✅ `GOOGLE_CLIENT_SECRET` - 已通过 wrangler 设置
 
 ### 阶段 5: Google Cloud 配置（待执行 ⏳）
 
@@ -134,11 +134,11 @@ AUTH_SECRET = 9762f772f0308a05d9f7d569518e27ddb4b67460bc98a97b81f0e97df63d4839
 阶段 1: 代码实现    ████████████████████ 100%
 阶段 2: 代码推送    ████████████████████ 100%
 阶段 3: Cloudflare 配置 ████████████████████ 100%
-阶段 4: 环境变量配置 ░░░░░░░░░░░░░░░░░░ 0%
+阶段 4: 环境变量配置 ████████████████░░░░ 80% (secrets 已完成)
 阶段 5: Google 配置   ░░░░░░░░░░░░░░░░░░ 0%
 阶段 6: 部署测试     ░░░░░░░░░░░░░░░░░░ 0%
 
-总体进度: ██████████████░░░░░░░░ 50%
+总体进度: ████████████████░░░░░░ 60%
 ```
 
 ---
