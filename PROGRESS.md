@@ -105,21 +105,20 @@ AUTH_SECRET = 9762f772f0308a05d9f7d569518e27ddb4b67460bc98a97b81f0e97df63d4839
 
 ---
 
-### 阶段 6: 部署与测试（部署完成 ✅）
+### 阶段 6: 部署与测试（进行中 🚀）
 
 7. **触发 Cloudflare Pages 重新部署** ✅ 已完成
-   - 推送多个提交来触发部署，最新提交: 50b6b4e
-   - 已修复路由文件格式和 wrangler.toml
+   - 推送多个提交来触发部署，最新提交: 047c6f0
+   - 已修复登录按钮（改为 <a href> 链接）
+   - 暂时移除了有问题的 functions 通配符路由
 
-8. **等待 Cloudflare Pages 自动部署** ✅ 已完成
-   - ✅ 手动部署成功！
-   - 新部署预览地址：https://2599f21c.image-background-remover-sfu.pages.dev
-   - （注：暂时移除了 functions 以确保部署成功，登录功能需后续完善）
+8. **等待 Cloudflare Pages 自动部署** ⏳ 进行中
+   - 等待 Pages 自动检测并部署新提交
 
-9. **测试登录功能** ⏳ 待完善 Functions 后测试
+9. **测试登录功能** ⏳ 等待部署后测试
    - 访问 https://imagebackgroundcleaning.shop
-   - 点击 Google 登录
-   - 验证用户信息显示
+   - 点击 Google 登录（现在是链接跳转）
+   - 验证登录流程
    - 测试登出功能
 
 ### 阶段 6: 部署与测试（待执行 ⏳）
