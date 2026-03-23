@@ -83,13 +83,15 @@ AUTH_SECRET = 9762f772f0308a05d9f7d569518e27ddb4b67460bc98a97b81f0e97df63d4839
 
 ### 阶段 5: Google Cloud 配置（说明 📋）
 
-**注意：** Google Cloud OAuth 客户端配置需要用户在 Google Cloud Console 中手动完成（需要交互式 OAuth 2.0 认证）。
+**⚠️ 重要说明：** Google Cloud OAuth 客户端配置无法通过 API key 自动完成，需要用户在 Google Cloud Console 中手动完成。
+
+**原因：** 修改 OAuth 客户端需要交互式 OAuth 2.0 身份认证（需用户在浏览器中授权），API key 权限不足。
 
 6. **配置 Google Cloud Console** 👆 请手动完成
    - 打开 https://console.cloud.google.com/
    - 选择你的项目
    - 进入 **APIs & Services** → **Credentials**
-   - 找到 "OAuth 2.0 Client IDs" 下的客户端，点击编辑
+   - 找到 "OAuth 2.0 Client IDs" 下的客户端（Client ID: 727583503867-cqrnra1cnmlpcu5cn34mr8g94h0lauft.apps.googleusercontent.com），点击编辑
 
    **添加授权 JavaScript 来源：**
    - `https://imagebackgroundcleaning.shop`
