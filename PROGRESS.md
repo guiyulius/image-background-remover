@@ -27,35 +27,47 @@
 
 **当前 GitHub 状态：**
 - 仓库：https://github.com/guiyulius/image-background-remover
-- 最新提交：de753ea
+- 最新提交：88aab97
 - 文件已全部推送
+
+---
+
+### 🔐 AUTH_SECRET 已生成
+
+```
+AUTH_SECRET = 9762f772f0308a05d9f7d569518e27ddb4b67460bc98a97b81f0e97df63d4839
+```
+
+（已保存，后续步骤需要使用）
 
 ---
 
 ## 📝 待执行的步骤
 
-### 阶段 3: Cloudflare 资源配置（待执行 ⏳）
+### 阶段 3: Cloudflare 资源配置（已完成 ✅）
 
-需要在有 wrangler 权限的环境中执行：
+已在有 wrangler 权限的环境中执行：
 
-1. **创建 D1 数据库**
+1. **创建 D1 数据库** → ✅ 已创建 `image-bg-remover-auth`
    ```bash
    npx wrangler d1 create image-bg-remover-auth
    ```
-   → 获得 `database_id`
+   → 获得 `database_id: 7fda749b-0c6c-430c-aa2b-eb4035afdc93`
 
-2. **更新 wrangler.toml**
-   - 填入 `database_id`
-   - 提交并推送
+2. **更新 wrangler.toml** → ✅ 已完成
+   - 填入 `database_id: 7fda749b-0c6c-430c-aa2b-eb4035afdc93`
+   - 配置了正确的 binding: `DB`
+   - （待提交并推送）
 
-3. **初始化数据库表**
+3. **初始化数据库表** → ✅ 已完成（本地 + 远程）
    ```bash
-   npx wrangler d1 execute image-bg-remover-auth --file=./schema.sql
+   npx wrangler d1 execute image-bg-remover-auth --file=./schema.sql --remote
    ```
+   → 4 个表 + 4 个索引创建成功
 
-4. **生成 AUTH_SECRET**
-   ```bash
-   node -e "console.log(crypto.randomBytes(32).toString('hex'))"
+4. **生成 AUTH_SECRET** → ✅ 已生成（见上文）
+   ```
+   AUTH_SECRET = 9762f772f0308a05d9f7d569518e27ddb4b67460bc98a97b81f0e97df63d4839
    ```
 
 ### 阶段 4: 环境变量配置（待执行 ⏳）

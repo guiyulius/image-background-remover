@@ -17,6 +17,7 @@ AUTH_TRUST_HOST = "true"
 # GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET should be set in Cloudflare Pages env vars
 # not in this file for security reasons
 
-# [d1_databases]
-# database_name = "image-bg-remover-auth"
-# database_id = "YOUR_DATABASE_ID_HERE"
+[[d1_databases]]
+binding = "DB"
+database_name = "image-bg-remover-auth"
+database_id = "7fda749b-0c6c-430c-aa2b-eb4035afdc93"
