@@ -81,15 +81,44 @@ AUTH_SECRET = 9762f772f0308a05d9f7d569518e27ddb4b67460bc98a97b81f0e97df63d4839
    - ✅ `GOOGLE_CLIENT_ID` - 已通过 wrangler 设置
    - ✅ `GOOGLE_CLIENT_SECRET` - 已通过 wrangler 设置
 
-### 阶段 5: Google Cloud 配置（进行中 🚧）
+### 阶段 5: Google Cloud 配置（说明 📋）
 
-6. **配置 Google Cloud Console** ⏳
-   - 添加授权 JavaScript 来源：
-     - `https://imagebackgroundcleaning.shop`
-     - `https://www.imagebackgroundcleaning.shop`
-   - 添加授权重定向 URI：
-     - `https://imagebackgroundcleaning.shop/api/auth/callback/google`
-     - `https://www.imagebackgroundcleaning.shop/api/auth/callback/google`
+**注意：** Google Cloud OAuth 客户端配置需要用户在 Google Cloud Console 中手动完成（需要交互式 OAuth 2.0 认证）。
+
+6. **配置 Google Cloud Console** 👆 请手动完成
+   - 打开 https://console.cloud.google.com/
+   - 选择你的项目
+   - 进入 **APIs & Services** → **Credentials**
+   - 找到 "OAuth 2.0 Client IDs" 下的客户端，点击编辑
+
+   **添加授权 JavaScript 来源：**
+   - `https://imagebackgroundcleaning.shop`
+   - `https://www.imagebackgroundcleaning.shop`
+
+   **添加授权重定向 URI：**
+   - `https://imagebackgroundcleaning.shop/api/auth/callback/google`
+   - `https://www.imagebackgroundcleaning.shop/api/auth/callback/google`
+
+   点击 **Save** 保存。
+
+---
+
+### 阶段 6: 部署与测试（进行中 🚀）
+
+（可以先触发部署，等 Google Cloud 配置完成后再测试）
+
+7. **触发 Cloudflare Pages 重新部署** ✅ 已完成
+   - 推送多个提交来触发部署，最新提交: 4298659
+   - 已修复路由文件格式和 wrangler.toml
+
+8. **等待 Cloudflare Pages 自动部署** ⏳ 进行中
+   - 等待 Pages 应该会自动检测到新提交并部署
+
+9. **测试登录功能** ⏳ 等待部署 + Google Cloud 配置
+   - 访问 https://imagebackgroundcleaning.shop
+   - 点击 Google 登录
+   - 验证用户信息显示
+   - 测试登出功能
 
 ### 阶段 6: 部署与测试（待执行 ⏳）
 
@@ -139,10 +168,10 @@ AUTH_SECRET = 9762f772f0308a05d9f7d569518e27ddb4b67460bc98a97b81f0e97df63d4839
 阶段 2: 代码推送    ████████████████████ 100%
 阶段 3: Cloudflare 配置 ████████████████████ 100%
 阶段 4: 环境变量配置 ████████████████████ 100%
-阶段 5: Google 配置   ██████░░░░░░░░░░░░ 30% (进行中)
-阶段 6: 部署测试     ░░░░░░░░░░░░░░░░░░ 0%
+阶段 5: Google 配置   ████████░░░░░░░░░░ 40% (等待手动配置)
+阶段 6: 部署测试     ██████░░░░░░░░░░░░ 30% (部署已触发)
 
-总体进度: ██████████████████░░░░ 70%
+总体进度: ███████████████████░░░ 80%
 ```
 
 ---
