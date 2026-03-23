@@ -70,16 +70,16 @@ AUTH_SECRET = 9762f772f0308a05d9f7d569518e27ddb4b67460bc98a97b81f0e97df63d4839
    AUTH_SECRET = 9762f772f0308a05d9f7d569518e27ddb4b67460bc98a97b81f0e97df63d4839
    ```
 
-### 阶段 4: 环境变量配置（待执行 ⏳）
+### 阶段 4: 环境变量配置（进行中 🚧）
 
 在 Cloudflare Dashboard 中配置：
 
 5. **设置 Cloudflare Pages 环境变量**
-   - `AUTH_SECRET`
-   - `AUTH_URL`
-   - `AUTH_TRUST_HOST`
-   - `GOOGLE_CLIENT_ID`
-   - `GOOGLE_CLIENT_SECRET`
+   - ✅ `AUTH_SECRET` - 已通过 wrangler 设置
+   - ⏳ `AUTH_URL` - 需在 Dashboard 中设置为 `https://imagebackgroundcleaning.shop`
+   - ⏳ `AUTH_TRUST_HOST` - 需在 Dashboard 中设置为 `true`
+   - 🔒 `GOOGLE_CLIENT_ID` - 需用户提供并在 Dashboard 中设置
+   - 🔒 `GOOGLE_CLIENT_SECRET` - 需用户提供并在 Dashboard 中设置
 
 ### 阶段 5: Google Cloud 配置（待执行 ⏳）
 
