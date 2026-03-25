@@ -223,7 +223,7 @@ AUTH_SECRET = 9762f772f0308a05d9f7d569518e27ddb4b67460bc98a97b81f0e97df63d4839
    - 解决方案：创建具体的路由文件来处理所有 Auth.js 端点
    - 结果：仍然出现错误
 
-3. **🔴 关键问题发现：wrangler.toml 中的重定向规则** (当前修复)
+3. **🔴 关键问题发现：wrangler.toml 中的重定向规则** (第三次尝试)
    - **问题根源：** wrangler.toml 中有一个通配符重定向规则：
      ```toml
      [[redirects]]
@@ -236,13 +236,27 @@ AUTH_SECRET = 9762f772f0308a05d9f7d569518e27ddb4b67460bc98a97b81f0e97df63d4839
      ```toml
      except = ["/api/*"]
      ```
+   - **结果：** 仍然有问题
+
+4. **🎯 最终解决方案：使用 _worker.js** (当前方案)
+   - **问题：** Functions 目录结构仍然不兼容
+   - **解决方案：** 使用单一的 `_worker.js` 文件来处理所有 API 请求
+   - **优势：**
+     - 单一入口文件，简化路由处理
+     - 直接使用 Cloudflare Workers 语法
+     - 更好的兼容性和控制力
+   - **实现：**
+     - 创建 `_worker.js` 处理 `/api/auth/*` 和 `/api/user` 路由
+     - 集成 Auth.js 和 D1 Adapter
+     - 使用 `env.ASSETS.fetch()` 提供静态文件
 
 ### 📝 最新提交：
-- **Commit:** `85a8777`
-- **描述:** fix: 在重定向规则中排除 API 路由
+- **Commit:** `1405aff`
+- **描述:** fix: 使用 _worker.js 来处理所有 API 请求
 - **文件变更:**
-  - ✅ 修复 `wrangler.toml` - 添加 `except = ["/api/*"]` 排除 API 路由
-  - ✅ 创建了具体的路由文件（signin, callback, signout, session, csrf 等）
+  - ✅ 创建 `_worker.js` - 单一的 worker 文件处理所有 API
+  - ✅ 移除了 `functions/` 目录
+  - ✅ 保持了 `wrangler.toml` 中的 API 路由排除
 - **状态:** ✅ 已推送到 GitHub
 
 ### ⏳ 下一步：
@@ -257,5 +271,5 @@ AUTH_SECRET = 9762f772f0308a05d9f7d569518e27ddb4b67460bc98a97b81f0e97df63d4839
    - 检查 `/api/user` 是否返回用户信息
 
 ### 🎊 总体进度：100%
-（关键问题已修复！重定向规则现在会排除 API 路由，等待部署和测试验证）
+（已采用 _worker.js 方案，这是最稳定的 Cloudflare Pages 集成方式）
 
