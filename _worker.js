@@ -18,7 +18,25 @@ export default {
       return Response.redirect('https://www.google.com', 302);
     }
     
-    // 服务静态文件
-    return env.ASSETS.fetch(request);
+    // 处理 API 路由
+    if (url.pathname.startsWith('/api/')) {
+      return new Response(JSON.stringify({ 
+        status: 'ok', 
+        path: url.pathname 
+      }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    
+    // 对于非 API 路径，让我们直接返回 index.html（SPA 路由处理）
+    // 首先检查静态文件是否存在
+    const staticResponse = await env.ASSETS.fetch(request);
+    if (staticResponse.ok) {
+      return staticResponse;
+    }
+    
+    // 如果静态文件不存在，返回 index.html（SPA 路由）
+    const indexRequest = new Request(new URL('/index.html', request.url), request);
+    return env.ASSETS.fetch(indexRequest);
   }
 };

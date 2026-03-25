@@ -2,12 +2,6 @@ name = "image-background-remover"
 compatibility_date = "2024-03-18"
 pages_build_output_dir = "."
 
-[[redirects]]
-from = "/*"
-to = "/index.html"
-status = 200
-except = ["/api/*"]
-
 [vars]
 AUTH_SECRET = "generate-a-random-secret-here-please-change-in-production"
 AUTH_URL = "https://imagebackgroundcleaning.shop"
