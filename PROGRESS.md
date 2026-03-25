@@ -203,5 +203,41 @@ AUTH_SECRET = 9762f772f0308a05d9f7d569518e27ddb4b67460bc98a97b81f0e97df63d4839
 - 可以通过点击"详情" → "继续访问"绕过警告
 - 或者使用 Pages 预览域名测试：https://image-background-remover-sfu.pages.dev
 
-### 🎊 总体进度：100%
+### 🔐 登录方式说明：
+由于 Cloudflare Pages Functions 通配符路由格式问题，当前登录方式：
+- **方式 1（推荐）：** 直接访问 `https://www.imagebackgroundcleaning.shop/api/auth/signin/google`
+- **方式 2：** 点击页面上的"使用 Google 登录"按钮（后续会修复 Functions 路由问题）
+
+---
+
+## 🔧 最新更新（2026-03-25）
+
+### ✅ 已修复的问题：
+1. **Cloudflare Pages Functions 通配符路由格式**
+   - 问题：`[[...auth]].ts` 或 `[...path].ts` 格式导致部署失败
+   - 解决方案：使用正确的 Cloudflare Pages Functions 通配符路由格式
+   - 实现：创建 `functions/api/auth/[...auth]/index.ts` 目录结构
+   
+### 📝 最新提交：
+- **Commit:** `6618346`
+- **描述:** fix: 恢复 Auth.js 路由并使用正确的通配符格式
+- **文件变更:**
+  - ✅ 恢复 `lib/auth.ts` (Auth.js 配置文件)
+  - ✅ 创建 `functions/api/auth/[...auth]/index.ts` (正确的通配符路由格式)
+  - ✅ 更新 `functions/api/user.ts`
+- **状态:** ✅ 已推送到 GitHub
+
+### ⏳ 下一步：
+1. **等待 Cloudflare Pages 自动部署**（通常 1-3 分钟）
+2. **测试登录功能：**
+   - 访问 https://imagebackgroundcleaning.shop
+   - 点击"使用 Google 登录"按钮
+   - 验证登录流程是否正常工作
+3. **验证路由：**
+   - 检查 `/api/auth/signin/google` 是否正常响应
+   - 检查 `/api/auth/callback/google` 是否正常工作
+   - 检查 `/api/user` 是否返回用户信息
+
+### 🎊 总体进度：98%
+（Auth.js 路由已修复，等待部署和测试验证）
 
