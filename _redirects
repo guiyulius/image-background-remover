@@ -1,5 +1,1 @@
-# 先排除 API 路由
-/api/* /api/:splat 200
-
-# 然后处理 SPA 路由
-/* /index.html 200
+# 暂时禁用重定向，先测试 API
