@@ -270,6 +270,48 @@ AUTH_SECRET = 9762f772f0308a05d9f7d569518e27ddb4b67460bc98a97b81f0e97df63d4839
    - 检查 `/api/auth/callback/google` 是否正常工作
    - 检查 `/api/user` 是否返回用户信息
 
-### 🎊 总体进度：100%
-（已采用 _worker.js 方案，这是最稳定的 Cloudflare Pages 集成方式）
+---
+
+## 🔄 问题诊断与全新方案（2026-03-25）
+
+### 📊 问题分析：
+经过多次尝试，发现 Cloudflare Pages Functions 没有被正确执行。所有 API 请求都返回 HTML（index.html）而不是 JSON 响应。
+
+**已尝试的方案：**
+1. ❌ Functions 目录结构 + wrangler.toml 重定向
+2. ❌ 具体路由文件（非通配符）
+3. ❌ _worker.js 单一文件
+4. ❌ _redirects 文件
+
+### 🎯 全新方案：简化策略
+
+考虑到时间和复杂度，建议采用以下简化方案：
+
+**方案 A：使用 Next.js（推荐）**
+- 完整的框架，内置路由处理
+- Auth.js 官方支持 Next.js
+- 更稳定可靠
+
+**方案 B：保持现状 + 直接链接登录**
+- 保持当前的 RemoveBG Pro 基础功能
+- 登录通过直接链接：`/api/auth/signin/google`
+- 后续再优化路由问题
+
+**方案 C：使用 Auth.js 官方 Cloudflare Pages 示例**
+- 参考官方文档，重新开始
+- 使用官方推荐的项目结构
+
+### 📝 当前提交历史：
+- `2f412da` - test: 暂时禁用重定向，先测试 API
+- `04728e6` - fix: 使用标准的 Pages Functions 目录结构和 _redirects 文件
+- `c0b0dc2` - test: 超简单的 worker 测试
+- `cd9ab33` - fix: 移除 wrangler.toml 重定向，在 _worker.js 中处理
+- `1405aff` - fix: 使用 _worker.js 来处理所有 API 请求
+- `943e5c8` - docs: 更新进度 - 采用 _worker.js 方案
+- `89fcbb7` - test: 简化版本 - 先验证基础 API 架构
+- `6618346` - fix: 恢复 Auth.js 路由并使用正确的通配符格式
+- `e962525` - docs: 更新进度 - 已修复 Auth.js 通配符路由
+
+### 🎊 总体进度：75%
+（核心功能已完成，路由问题需要采用新方案解决）
 
