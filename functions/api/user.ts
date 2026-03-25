@@ -1,14 +1,18 @@
-import { authConfig } from '../../lib/auth';
 import { getSession } from '@auth/core';
+import { authConfig } from '../../lib/auth';
 
-export const onRequestGet: PagesFunction = async (context) => {
+export const onRequest: PagesFunction = async (context) => {
   const { request, env } = context;
-  const config = authConfig(env);
+  const session = await getSession(request, authConfig(env));
   
-  // @ts-ignore
-  const session = await getSession(request, config);
-
-  return new Response(JSON.stringify({ user: session?.user || null }), {
+  if (!session?.user) {
+    return new Response(JSON.stringify({ error: 'Not authenticated' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  
+  return new Response(JSON.stringify({ user: session.user }), {
     headers: { 'Content-Type': 'application/json' },
   });
 };
