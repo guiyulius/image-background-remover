@@ -213,18 +213,34 @@ AUTH_SECRET = 9762f772f0308a05d9f7d569518e27ddb4b67460bc98a97b81f0e97df63d4839
 ## 🔧 最新更新（2026-03-25）
 
 ### ✅ 已修复的问题：
-1. **Cloudflare Pages Functions 通配符路由格式**
+1. **Cloudflare Pages Functions 通配符路由格式** (第一次尝试)
    - 问题：`[[...auth]].ts` 或 `[...path].ts` 格式导致部署失败
-   - 解决方案：使用正确的 Cloudflare Pages Functions 通配符路由格式
-   - 实现：创建 `functions/api/auth/[...auth]/index.ts` 目录结构
-   
+   - 方案：使用 `[...auth]/index.ts` 目录结构
+   - 结果：仍然出现 HTTP ERROR 405
+
+2. **使用具体的路由文件而不是通配符路由** (当前方案)
+   - 问题：通配符路由在 Cloudflare Pages Functions 中不兼容
+   - 解决方案：创建具体的路由文件来处理所有 Auth.js 端点
+   - 实现的路由文件：
+     - `functions/api/auth/_auth.ts` - 共享的 Auth handler
+     - `functions/api/auth/signin/google.ts` - Google 登录
+     - `functions/api/auth/callback/google.ts` - Google 回调
+     - `functions/api/auth/signout.ts` - 登出
+     - `functions/api/auth/session.ts` - 会话管理
+     - `functions/api/auth/csrf.ts` - CSRF token
+     - `functions/api/auth/index.ts` - 其他请求
+
 ### 📝 最新提交：
-- **Commit:** `6618346`
-- **描述:** fix: 恢复 Auth.js 路由并使用正确的通配符格式
+- **Commit:** `62c73d8`
+- **描述:** fix: 使用具体的路由文件而不是通配符路由
 - **文件变更:**
-  - ✅ 恢复 `lib/auth.ts` (Auth.js 配置文件)
-  - ✅ 创建 `functions/api/auth/[...auth]/index.ts` (正确的通配符路由格式)
-  - ✅ 更新 `functions/api/user.ts`
+  - ✅ 创建 `functions/api/auth/_auth.ts` (共享 Auth handler)
+  - ✅ 创建 `functions/api/auth/signin/google.ts`
+  - ✅ 创建 `functions/api/auth/callback/google.ts`
+  - ✅ 创建 `functions/api/auth/signout.ts`
+  - ✅ 创建 `functions/api/auth/session.ts`
+  - ✅ 创建 `functions/api/auth/csrf.ts`
+  - ✅ 创建 `functions/api/auth/index.ts`
 - **状态:** ✅ 已推送到 GitHub
 
 ### ⏳ 下一步：
@@ -238,6 +254,6 @@ AUTH_SECRET = 9762f772f0308a05d9f7d569518e27ddb4b67460bc98a97b81f0e97df63d4839
    - 检查 `/api/auth/callback/google` 是否正常工作
    - 检查 `/api/user` 是否返回用户信息
 
-### 🎊 总体进度：98%
-（Auth.js 路由已修复，等待部署和测试验证）
+### 🎊 总体进度：99%
+（已使用具体路由文件替代通配符路由，等待部署和测试验证）
 
