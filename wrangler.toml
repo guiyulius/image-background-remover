@@ -9,6 +9,7 @@ publish = "."
 from = "/*"
 to = "/index.html"
 status = 200
+except = ["/api/*"]
 
 [vars]
 AUTH_SECRET = "generate-a-random-secret-here-please-change-in-production"
