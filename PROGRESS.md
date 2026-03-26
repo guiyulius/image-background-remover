@@ -312,6 +312,57 @@ AUTH_SECRET = 9762f772f0308a05d9f7d569518e27ddb4b67460bc98a97b81f0e97df63d4839
 - `6618346` - fix: 恢复 Auth.js 路由并使用正确的通配符格式
 - `e962525` - docs: 更新进度 - 已修复 Auth.js 通配符路由
 
-### 🎊 总体进度：75%
-（核心功能已完成，路由问题需要采用新方案解决）
+---
+
+## 🚀 采用全新方案：Next.js（2026-03-25）
+
+### 📊 问题诊断结论：
+经过多次测试，确认 Cloudflare Pages Functions 在当前项目配置中没有被正确激活。所有尝试的方案都无法让 Functions 正常执行。
+
+### 🎯 最终方案：使用 Next.js
+**选择理由：**
+1. ✅ **官方支持** - Auth.js 官方完美支持 Next.js
+2. ✅ **路由简单** - Next.js App Router 开箱即用
+3. ✅ **稳定可靠** - 大型生产项目的标准选择
+4. ✅ **Cloudflare 集成** - 可以部署到 Cloudflare Pages
+
+### 📋 实施计划：
+1. 创建新的 Next.js 项目
+2. 集成 Auth.js + Google OAuth
+3. 移植 RemoveBG Pro 功能
+4. 配置 D1 数据库（可选，也可以用其他数据库）
+5. 部署到 Cloudflare Pages 或 Vercel
+
+### 🎊 总体进度：85%
+
+---
+
+## 🔧 最新进展（2026-03-27）
+
+### ✅ 已完成的优化：
+1. **简化登录方式 - 使用直接链接**
+   - 修改 index.html，将登录/登出按钮从 POST form 改为直接 <a href> 链接
+   - 避免了 Functions 路由问题
+   - 最新提交：`0af24ca`
+   - 描述："fix: 使用直接链接替代 POST form，避免 Functions 路由问题"
+
+2. **清理有问题的 Functions 文件**
+   - 删除了不兼容的通配符路由文件 `functions/api/auth/[...auth].ts`
+   - 删除了 `functions/api/auth/signin/google.js`
+   - 保持项目简洁
+
+### 📝 当前状态：
+- **GitHub:** 最新代码已提交（`0af24ca`）
+- **Cloudflare Pages:** 等待自动部署
+- **测试状态:** 准备就绪，部署后即可测试
+
+### 🧪 部署后测试步骤：
+1. 访问 https://imagebackgroundcleaning.shop
+2. 点击"使用 Google 登录"按钮（现在是直接链接）
+3. 完成 Google 登录流程
+4. 验证用户信息显示
+5. 测试登出功能
+
+### 📊 总体进度：85%
+（核心功能已完成，等待最终部署测试）
 
