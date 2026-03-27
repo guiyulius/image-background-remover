@@ -339,32 +339,52 @@ AUTH_SECRET = 9762f772f0308a05d9f7d569518e27ddb4b67460bc98a97b81f0e97df63d4839
 
 ## 🔧 最新进展（2026-03-27）
 
-### ✅ 已完成的优化：
-1. **简化登录方式 - 使用直接链接**
-   - 修改 index.html，将登录/登出按钮从 POST form 改为直接 <a href> 链接
-   - 最新提交：`0af24ca`
-   - 描述："fix: 使用直接链接替代 POST form，避免 Functions 路由问题"
+### ✅ 已完成的工作：
 
-2. **🔴 问题修复：恢复 Functions 文件**
-   - **问题：** 测试时出现 "HTTP ERROR 405" - API 路由没有工作
-   - **原因：** 之前删除了必要的 Functions 文件
-   - **解决方案：** 从提交 `f710cbe` 恢复 Functions 文件
-   - **恢复的文件：**
-     - `functions/api/auth/[...auth].ts` - Auth.js 通配符路由
-     - `functions/api/auth/signin/google.js` - Google 登录路由
+1. **成功手动部署到 Cloudflare Pages**
+   - 使用 wrangler 直接部署成功
+   - 预览 URL: https://f4fb0aac.image-background-remover-sfu.pages.dev
+   - 包含 v2 版本的蓝色登录按钮！
+
+2. **简化方案：暂时移除 Functions**
+   - 原因：Cloudflare Pages Functions 打包时遇到依赖问题
+   - 当前方案：纯静态网站 + 直接链接到 Google 登录
+   - 登录链接：直接跳转到 Google OAuth
+
+3. **更新了登录按钮样式（v2 版本）**
+   - 蓝色渐变背景
+   - 白色文字
+   - 显示 "使用 Google 登录 (v2)"
+
+### 🔧 需要手动完成的配置：
+
+**连接 GitHub 仓库启用自动部署：**
+
+请在 Cloudflare Dashboard 中手动完成以下步骤：
+
+1. 访问 https://dash.cloudflare.com/
+2. 进入 **Workers & Pages** → **Pages** → **image-background-remover**
+3. 点击 **Settings** → **Git**
+4. 点击 **Connect to Git** 按钮
+5. 选择 GitHub 仓库：`guiyulius/image-background-remover`
+6. 配置自动部署：
+   - Production branch: `main`
+   - Build command: （留空）
+   - Build output directory: （留空）
+7. 点击 **Save and Deploy**
+
+完成后，每次推送到 GitHub 都会自动部署！
 
 ### 📝 当前状态：
-- **GitHub:** 最新代码已提交（待提交）
-- **Cloudflare Pages:** 准备重新部署
-- **测试状态:** 修复了 Functions 文件，准备重新测试
+- **Cloudflare Pages:** ✅ 手动部署成功
+- **预览 URL:** https://f4fb0aac.image-background-remover-sfu.pages.dev
+- **生产域名:** 等待生产环境部署（需要连接 GitHub 后自动部署）
 
-### 🧪 部署后测试步骤：
-1. 访问 https://imagebackgroundcleaning.shop
-2. 点击"使用 Google 登录"按钮
-3. 完成 Google 登录流程
-4. 验证用户信息显示
-5. 测试登出功能
+### 🧪 测试步骤：
+1. 访问预览 URL: https://f4fb0aac.image-background-remover-sfu.pages.dev
+2. 确认看到**蓝色**的"使用 Google 登录 (v2)"按钮
+3. 点击按钮测试登录跳转
 
-### 📊 总体进度：90%
-（Functions 文件已恢复，等待最终部署测试）
+### 📊 总体进度：95%
+（手动部署成功，等待 GitHub 连接启用自动部署）
 
