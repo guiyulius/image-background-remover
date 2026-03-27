@@ -342,27 +342,29 @@ AUTH_SECRET = 9762f772f0308a05d9f7d569518e27ddb4b67460bc98a97b81f0e97df63d4839
 ### ✅ 已完成的优化：
 1. **简化登录方式 - 使用直接链接**
    - 修改 index.html，将登录/登出按钮从 POST form 改为直接 <a href> 链接
-   - 避免了 Functions 路由问题
    - 最新提交：`0af24ca`
    - 描述："fix: 使用直接链接替代 POST form，避免 Functions 路由问题"
 
-2. **清理有问题的 Functions 文件**
-   - 删除了不兼容的通配符路由文件 `functions/api/auth/[...auth].ts`
-   - 删除了 `functions/api/auth/signin/google.js`
-   - 保持项目简洁
+2. **🔴 问题修复：恢复 Functions 文件**
+   - **问题：** 测试时出现 "HTTP ERROR 405" - API 路由没有工作
+   - **原因：** 之前删除了必要的 Functions 文件
+   - **解决方案：** 从提交 `f710cbe` 恢复 Functions 文件
+   - **恢复的文件：**
+     - `functions/api/auth/[...auth].ts` - Auth.js 通配符路由
+     - `functions/api/auth/signin/google.js` - Google 登录路由
 
 ### 📝 当前状态：
-- **GitHub:** 最新代码已提交（`0af24ca`）
-- **Cloudflare Pages:** 等待自动部署
-- **测试状态:** 准备就绪，部署后即可测试
+- **GitHub:** 最新代码已提交（待提交）
+- **Cloudflare Pages:** 准备重新部署
+- **测试状态:** 修复了 Functions 文件，准备重新测试
 
 ### 🧪 部署后测试步骤：
 1. 访问 https://imagebackgroundcleaning.shop
-2. 点击"使用 Google 登录"按钮（现在是直接链接）
+2. 点击"使用 Google 登录"按钮
 3. 完成 Google 登录流程
 4. 验证用户信息显示
 5. 测试登出功能
 
-### 📊 总体进度：85%
-（核心功能已完成，等待最终部署测试）
+### 📊 总体进度：90%
+（Functions 文件已恢复，等待最终部署测试）
 
