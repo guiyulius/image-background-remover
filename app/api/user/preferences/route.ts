@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
+import { auth } from '@/lib/auth'
 import { getOrCreateUserPreferences, updateUserPreferences } from '@/lib/mock-data'
 
 export async function GET() {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   
   if (!session?.user?.email) {
     return NextResponse.json({ error: '未登录' }, { status: 401 })
@@ -25,7 +24,7 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   
   if (!session?.user?.email) {
     return NextResponse.json({ error: '未登录' }, { status: 401 })

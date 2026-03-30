@@ -1,8 +1,8 @@
-// Auth.js 配置
+// Auth.js v5 beta 配置
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 
-export const authOptions = {
+export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -11,8 +11,4 @@ export const authOptions = {
   ],
   secret: process.env.AUTH_SECRET,
   trustHost: true,
-}
-
-const { handlers } = NextAuth(authOptions)
-
-export { handlers as GET, handlers as POST }
+})
