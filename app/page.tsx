@@ -6,21 +6,32 @@ import Link from 'next/link'
 import { removeBackground } from '@imgly/background-removal'
 import { addProcessingHistory } from '@/lib/mock-data'
 
-export default function Home() {
+export default function HomePlanA() {
   const { data: session, status } = useSession()
   const [originalImage, setOriginalImage] = useState<string | null>(null)
   const [processedImage, setProcessedImage] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [showSavePrompt, setShowSavePrompt] = useState(false)
-  const [processingInfo, setProcessingInfo] = useState<{
-    filename: string
-    originalSize: number
-    processedSize: number
-    processingTime: number
-    outputFormat: string
-  } | null>(null)
+  const [quota, setQuota] = useState<any>(null)
+  const [showQuotaWarning, setShowQuotaWarning] = useState(false)
+  const [showQuotaExhausted, setShowQuotaExhausted] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    checkQuota()
+  }, [status])
+
+  async function checkQuota() {
+    try {
+      const res = await fetch('/api/usage/check?identifier=anonymous')
+      if (res.ok) {
+        const data = await res.json()
+        setQuota(data)
+      }
+    } catch (error) {
+      console.error('检查额度失败:', error)
+    }
+  }
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -33,8 +44,8 @@ export default function Home() {
 
     setError(null)
     setProcessedImage(null)
-    setShowSavePrompt(false)
-    setProcessingInfo(null)
+    setShowQuotaWarning(false)
+    setShowQuotaExhausted(false)
     
     const reader = new FileReader()
     reader.onload = (event) => {
@@ -51,9 +62,37 @@ export default function Home() {
     
     setIsProcessing(true)
     setError(null)
-    setShowSavePrompt(false)
+    setShowQuotaWarning(false)
+    setShowQuotaExhausted(false)
 
     try {
+      // 先尝试使用额度
+      const recordRes = await fetch('/api/usage/record', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          identifier: 'anonymous',
+          type: 'processing'
+        })
+      })
+
+      if (!recordRes.ok) {
+        const data = await recordRes.json()
+        if (recordRes.status === 429) {
+          setShowQuotaExhausted(true)
+          return
+        }
+        throw new Error(data.error)
+      }
+
+      const recordData = await recordRes.json()
+      setQuota(recordData)
+
+      if (recordData.remaining === 1 && !recordData.isLoggedIn) {
+        setShowQuotaWarning(true)
+      }
+
+      // 处理图片
       const blob = await (await fetch(originalImage)).blob()
       const resultBlob = await removeBackground(blob, {
         debug: false,
@@ -66,15 +105,6 @@ export default function Home() {
       const url = URL.createObjectURL(resultBlob)
       setProcessedImage(url)
       
-      // 保存处理信息
-      setProcessingInfo({
-        filename: file.name,
-        originalSize: file.size,
-        processedSize: resultBlob.size,
-        processingTime,
-        outputFormat: 'png'
-      })
-      
       // 如果已登录，自动保存到历史记录
       if (session?.user?.email) {
         addProcessingHistory(session.user.email, {
@@ -84,9 +114,6 @@ export default function Home() {
           processingTime,
           outputFormat: 'png'
         })
-      } else {
-        // 未登录，显示保存提示
-        setShowSavePrompt(true)
       }
     } catch (err) {
       console.error('Error:', err)
@@ -111,14 +138,13 @@ export default function Home() {
     setOriginalImage(null)
     setProcessedImage(null)
     setError(null)
-    setShowSavePrompt(false)
-    setProcessingInfo(null)
+    setShowQuotaWarning(false)
+    setShowQuotaExhausted(false)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
   }
 
-  // 格式化文件大小
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 B'
     const k = 1024
@@ -187,29 +213,78 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {!session && (
-          <div className="mb-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl shadow-xl p-6 text-white">
+        {/* 额度提示 */}
+        {quota && (
+          <div className={`mb-8 rounded-2xl shadow-xl p-6 ${
+            showQuotaExhausted ? 'bg-red-50 border border-red-200' : 
+            showQuotaWarning ? 'bg-yellow-50 border border-yellow-200' :
+            'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
+          }`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                  <span className="text-2xl">💾</span>
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                  showQuotaExhausted ? 'bg-red-100' : 
+                  showQuotaWarning ? 'bg-yellow-100' : 'bg-white/20'
+                }`}>
+                  <span className="text-2xl">
+                    {showQuotaExhausted ? '⚠️' : showQuotaWarning ? '⏱️' : '🎁'}
+                  </span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold">登录保存历史记录</h3>
-                  <p className="text-white/80">随时找回之前的图片，管理你的处理记录</p>
+                  {showQuotaExhausted ? (
+                    <>
+                      <h3 className="text-lg font-semibold text-red-900">今日/本月免费次数已用完</h3>
+                      <p className="text-red-700">
+                        {quota.isLoggedIn ? '下个月 1 号重置额度' : '请登录获取更多次数或明天再来'}
+                      </p>
+                    </>
+                  ) : showQuotaWarning ? (
+                    <>
+                      <h3 className="text-lg font-semibold text-yellow-900">
+                        还剩最后 1 次免费机会！
+                      </h3>
+                      <p className="text-yellow-700">
+                        {!quota.isLoggedIn && '登录解锁更多次数！'}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="text-lg font-semibold">
+                        {quota.isLoggedIn ? '本月剩余' : '今日剩余'}：{quota.remaining}/{quota.total} 次
+                      </h3>
+                      {quota.isLoggedIn && quota.nextResetIn && (
+                        <p className="text-white/80">
+                          下次重置：{quota.nextResetIn}
+                        </p>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
-              <button
-                onClick={() => signIn('google')}
-                className="px-6 py-2.5 bg-white text-purple-600 font-medium rounded-xl hover:bg-gray-100 transition-colors"
-              >
-                立即登录
-              </button>
+              {!quota.isLoggedIn && !showQuotaExhausted && (
+                <button
+                  onClick={() => signIn('google')}
+                  className={`px-6 py-2.5 font-medium rounded-xl transition-all ${
+                    showQuotaWarning ? 'bg-white text-yellow-600 hover:bg-gray-100' :
+                    'bg-white text-purple-600 hover:bg-gray-100'
+                  }`}
+                >
+                  登录获取更多次数
+                </button>
+              )}
+              {showQuotaExhausted && !quota.isLoggedIn && (
+                <button
+                  onClick={() => signIn('google')}
+                  className="px-6 py-2.5 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors"
+                >
+                  登录解锁更多
+                </button>
+              )}
             </div>
           </div>
         )}
 
-        {!processedImage ? (
+        {!showQuotaExhausted && !processedImage ? (
           <div className="text-center">
             <div className="mb-8">
               <h2 className="text-4xl font-bold text-gray-900 mb-4">
@@ -218,11 +293,6 @@ export default function Home() {
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                 使用 AI 技术，简单、快速、专业的背景移除效果
               </p>
-              {!session && (
-                <p className="text-sm text-purple-600 mt-2">
-                  🎉 无限免费使用！登录可保存历史记录
-                </p>
-              )}
             </div>
 
             {!originalImage ? (
@@ -241,7 +311,7 @@ export default function Home() {
                     点击或拖拽图片到此处
                   </p>
                   <p className="text-sm text-gray-400">
-                    支持 JPG、PNG、WebP 格式 · 无限免费使用
+                    支持 JPG、PNG、WebP 格式
                   </p>
                 </div>
                 <input
@@ -296,6 +366,37 @@ export default function Home() {
               </div>
             )}
           </div>
+        ) : showQuotaExhausted ? (
+          <div className="text-center py-16">
+            <div className="w-24 h-24 mx-auto mb-6 bg-red-100 rounded-2xl flex items-center justify-center">
+              <span className="text-5xl">⏰</span>
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              免费次数已用完
+            </h2>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              {session?.user?.email ? 
+                '本月 50 次免费额度已用完，请下个月再来或升级到 Pro' :
+                '今日 3 次免费额度已用完，请登录获取更多次数或明天再来'
+              }
+            </p>
+            <div className="flex gap-4 justify-center">
+              {!session?.user?.email && (
+                <button
+                  onClick={() => signIn('google')}
+                  className="px-8 py-3 text-white bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 rounded-xl font-medium shadow-lg shadow-purple-500/30 transition-all hover:shadow-xl"
+                >
+                  登录解锁更多
+                </button>
+              )}
+              <button
+                onClick={reset}
+                className="px-8 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors"
+              >
+                {session?.user?.email ? '升级到 Pro' : '明天再来'}
+              </button>
+            </div>
+          </div>
         ) : (
           <div className="text-center">
             <div className="mb-8">
@@ -306,51 +407,6 @@ export default function Home() {
                 你的图片背景已经完美移除
               </p>
             </div>
-
-            {processingInfo && (
-              <div className="max-w-2xl mx-auto mb-8 bg-white rounded-2xl shadow-xl p-4">
-                <div className="grid grid-cols-4 gap-4 text-sm">
-                  <div>
-                    <p className="text-gray-500">原始大小</p>
-                    <p className="font-semibold text-gray-900">{formatFileSize(processingInfo.originalSize)}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">处理后大小</p>
-                    <p className="font-semibold text-gray-900">{formatFileSize(processingInfo.processedSize)}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">处理耗时</p>
-                    <p className="font-semibold text-gray-900">{(processingInfo.processingTime / 1000).toFixed(1)}s</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">输出格式</p>
-                    <p className="font-semibold text-gray-900">{processingInfo.outputFormat.toUpperCase()}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {showSavePrompt && !session && (
-              <div className="max-w-2xl mx-auto mb-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl shadow-xl p-6 text-white">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                      <span className="text-2xl">💾</span>
-                    </div>
-                    <div className="text-left">
-                      <h3 className="text-lg font-semibold">想要保存这张图片的处理记录吗？</h3>
-                      <p className="text-white/80">登录后可以随时找回和重新下载</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => signIn('google')}
-                    className="px-6 py-2.5 bg-white text-purple-600 font-medium rounded-xl hover:bg-gray-100 transition-colors"
-                  >
-                    登录保存
-                  </button>
-                </div>
-              </div>
-            )}
 
             <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-8">
               <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -404,9 +460,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-gray-500">
             © 2025 RemoveBG Pro. 使用 AI 技术，让图片处理更简单。
-            {!session && (
+            {!session?.user?.email && (
               <span className="ml-2 text-purple-600">
-                · 登录保存历史记录
+                · 登录解锁更多免费次数
               </span>
             )}
           </p>
