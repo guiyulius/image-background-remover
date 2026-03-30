@@ -3,411 +3,331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RemoveBG Pro - AI 图片背景去除</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>RemoveBG Pro - 方案 A</title>
     <style>
-        .upload-area { border: 2px dashed #3b82f6; transition: all 0.3s ease; }
-        .upload-area.dragover { border-color: #1d4ed8; background-color: #eff6ff; }
-        .compare-slider { position: relative; overflow: hidden; }
-        .compare-before { clip-path: polygon(0 0, var(--position, 50%) 0, var(--position, 50%) 100%, 0 100%); }
-        .compare-handle { position: absolute; top: 0; bottom: 0; width: 2px; background: #3b82f6; cursor: ew-resize; left: var(--position, 50%); transform: translateX(-50%); }
-        .compare-handle::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 30px; height: 30px; background: #3b82f6; border-radius: 50%; border: 2px solid white; }
-        .compare-handle::after { content: '◀ ▶'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 10px; font-weight: bold; }
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .checkerboard { background: linear-gradient(45deg, #eee 25%, transparent 25%), linear-gradient(-45deg, #eee 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #eee 75%), linear-gradient(-45deg, transparent 75%, #eee 75%), #fff; background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f3e8ff 0%, #ffffff 50%, #dbeafe 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+            transition: all 0.2s;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(168, 85, 247, 0.4);
+        }
+
+        .main {
+            max-width: 7xl;
+            margin: 0 auto;
+            padding: 3rem 1rem;
+            text-align: center;
+        }
+
+        .quota-card {
+            background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 10px 40px rgba(168, 85, 247, 0.3);
+        }
+
+        .quota-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .quota-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .quota-info {
+            text-align: left;
+        }
+
+        .quota-remaining {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .quota-reset {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin-top: 0.25rem;
+        }
+
+        .quota-login-btn {
+            background: white;
+            color: #7c3aed;
+            padding: 0.625rem 1.5rem;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quota-login-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: #6b7280;
+            margin-bottom: 3rem;
+            max-width: 42rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .upload-area {
+            border: 3px dashed #d1d5db;
+            border-radius: 24px;
+            padding: 4rem 2rem;
+            max-width: 500px;
+            margin: 0 auto;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .upload-area:hover {
+            border-color: #a855f7;
+            background: #faf5ff;
+        }
+
+        .upload-icon {
+            width: 96px;
+            height: 96px;
+            background: linear-gradient(135deg, #f3e8ff 0%, #dbeafe 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 3rem;
+        }
+
+        .upload-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.75rem;
+        }
+
+        .upload-desc {
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-hint {
+            font-size: 0.875rem;
+            color: #9ca3af;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 4rem;
+        }
+
+        .plan-tag {
+            display: inline-block;
+            background: #fef3c7;
+            color: #92400e;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <nav class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                    </div>
-                    <span class="text-xl font-bold text-gray-800">RemoveBG Pro</span>
-                </div>
-                <div id="auth-container">
-                    <!-- Login button - 使用 API 路由 (v5 - 2026-03-27) -->
-                    <a href="/api/auth/signin/google" class="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 border border-blue-600 rounded-lg px-4 py-2 hover:from-blue-600 hover:to-blue-700 transition-colors shadow-md">
-                        <svg class="w-5 h-5" viewBox="0 0 24 24">
-                            <path fill="white" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path fill="white" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path fill="white" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                            <path fill="white" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                        </svg>
-                        <span class="text-white font-bold">使用 Google 登录 (v5)</span>
-                    </a>
-                    
-                    <!-- User info (shown when logged in) -->
-                    <div id="user-info" class="hidden flex items-center space-x-3">
-                        <img id="user-avatar" class="w-8 h-8 rounded-full" alt="用户头像">
-                        <span id="user-name" class="text-gray-700 font-medium"></span>
-                        <a href="/api/auth/signout" class="text-gray-500 hover:text-gray-700 text-sm">退出</a>
+<body>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">🎨</div>
+            <div class="logo-text">RemoveBG Pro</div>
+        </div>
+        <button class="login-btn" onclick="login()">
+            <span style="margin-right: 0.5rem;">🔵</span>
+            使用 Google 登录
+        </button>
+    </header>
+
+    <main class="main">
+        <div class="plan-tag">方案 A：免费额度+历史记录型</div>
+
+        <div class="quota-card">
+            <div class="quota-content">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div class="quota-icon">🎁</div>
+                    <div class="quota-info">
+                        <div class="quota-remaining">今日剩余：3/3 次（未登录）</div>
+                        <div class="quota-reset">登录解锁更多次数！</div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </nav>
-
-    <main class="max-w-4xl mx-auto px-4 py-12">
-        <div class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-gray-900 mb-4">一键去除图片背景</h1>
-            <p class="text-xl text-gray-600">AI 驱动，精准抠图</p>
-        </div>
-
-        <div id="upload-section">
-            <div id="upload-area" class="upload-area bg-white rounded-2xl p-12 text-center cursor-pointer">
-                <div class="mb-4">
-                    <svg class="w-16 h-16 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                    </svg>
-                </div>
-                <h3 class="text-xl font-semibold text-gray-800 mb-2">拖拽图片到此处</h3>
-                <p class="text-gray-500 mb-4">或点击选择文件</p>
-                <p class="text-sm text-gray-400">支持 JPG、PNG、WEBP，最大 10MB</p>
-                <input type="file" id="file-input" class="hidden" accept="image/jpeg,image/png,image/webp">
+                <button class="quota-login-btn" onclick="login()">登录获取更多</button>
             </div>
         </div>
 
-        <div id="processing-section" class="hidden text-center py-12">
-            <div class="spinner mx-auto mb-4"></div>
-            <p class="text-lg text-gray-600">AI 正在抠图...</p>
-            <p class="text-sm text-gray-400 mt-2">请稍候</p>
-        </div>
+        <h1 class="title">一键移除图片背景</h1>
+        <p class="subtitle">使用 AI 技术，简单、快速、专业的背景移除效果</p>
 
-        <div id="result-section" class="hidden">
-            <div class="bg-white rounded-2xl shadow-lg p-8">
-                <div class="mb-8">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">前后对比</h3>
-                    <div id="compare-container" class="compare-slider relative rounded-xl overflow-hidden" style="--position: 50%;">
-                        <div id="result-container" class="checkerboard">
-                        <img id="result-image" class="w-full h-auto" alt="处理结果">
-                        </div>
-                        <img id="original-image" class="compare-before absolute top-0 left-0 w-full h-auto" alt="原图">
-                        <div id="compare-handle" class="compare-handle"></div>
-                    </div>
-                </div>
-
-                <div class="mb-8">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">背景颜色</h3>
-                    <div class="flex flex-wrap gap-4">
-                        <label class="cursor-pointer">
-                            <input type="radio" name="bg-color" value="transparent" class="sr-only" checked>
-                            <div class="bg-picker w-12 h-12 rounded-lg border-2 border-blue-500" style="background: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%), white; background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px;"></div>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="bg-color" value="#ffffff" class="sr-only">
-                            <div class="bg-picker w-12 h-12 rounded-lg border-2 border-gray-300" style="background-color: #ffffff;"></div>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="bg-color" value="#0066cc" class="sr-only">
-                            <div class="bg-picker w-12 h-12 rounded-lg border-2 border-gray-300" style="background-color: #0066cc;"></div>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="bg-color" value="#ff0000" class="sr-only">
-                            <div class="bg-picker w-12 h-12 rounded-lg border-2 border-gray-300" style="background-color: #ff0000;"></div>
-                        </label>
-                        <label class="cursor-pointer flex items-center">
-                            <input type="color" id="custom-color" value="#667eea" class="w-12 h-12 rounded-lg border-2 border-gray-300 cursor-pointer">
-                        </label>
-                    </div>
-                </div>
-
-                <div class="flex flex-wrap gap-4">
-                    <button id="download-btn" class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                        <span class="flex items-center justify-center">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                            </svg>
-                            下载图片
-                        </span>
-                    </button>
-                    <button id="reupload-btn" class="bg-gray-100 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
-                        继续处理
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div id="error-section" class="hidden text-center py-12">
-            <div class="bg-red-50 rounded-2xl p-8">
-                <svg class="w-16 h-16 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <h3 class="text-xl font-semibold text-red-800 mb-2">处理失败</h3>
-                <p id="error-message" class="text-red-600 mb-4">请重试</p>
-                <button id="retry-btn" class="bg-red-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-red-700 transition-colors">
-                    重试
-                </button>
-            </div>
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <div class="upload-icon">📷</div>
+            <h3 class="upload-title">上传你的图片</h3>
+            <p class="upload-desc">点击或拖拽图片到此处</p>
+            <p class="upload-hint">支持 JPG、PNG、WebP 格式</p>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
         </div>
     </main>
 
+    <footer class="footer">
+        <p>© 2025 RemoveBG Pro. 使用 AI 技术，让图片处理更简单。<span style="color: #7c3aed; margin-left: 0.5rem;">· 登录解锁更多免费次数</span></p>
+    </footer>
+
     <script>
-        let currentFile = null;
-        let resultBlob = null;
+        let guestUsage = JSON.parse(localStorage.getItem('guestUsage') || '{}');
+        const today = new Date().toISOString().split('T')[0];
 
-        const uploadArea = document.getElementById('upload-area');
-        const fileInput = document.getElementById('file-input');
-        const uploadSection = document.getElementById('upload-section');
-        const processingSection = document.getElementById('processing-section');
-        const resultSection = document.getElementById('result-section');
-        const errorSection = document.getElementById('error-section');
-        const originalImage = document.getElementById('original-image');
-        const resultImage = document.getElementById('result-image');
-        const resultContainer = document.getElementById('result-container');
-        const compareContainer = document.getElementById('compare-container');
-        const compareHandle = document.getElementById('compare-handle');
-        const downloadBtn = document.getElementById('download-btn');
-        const reuploadBtn = document.getElementById('reupload-btn');
-        const retryBtn = document.getElementById('retry-btn');
-        const errorMessage = document.getElementById('error-message');
-        const customColor = document.getElementById('custom-color');
+        if (!guestUsage[today]) {
+            guestUsage[today] = 0;
+            localStorage.setItem('guestUsage', JSON.stringify(guestUsage));
+        }
 
-        uploadArea.addEventListener('click', () => fileInput.click());
-        
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
-        
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
-        
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFile(files[0]);
+        function updateQuotaDisplay() {
+            const used = guestUsage[today] || 0;
+            const remaining = 3 - used;
+            const quotaText = document.querySelector('.quota-remaining');
+            const quotaCard = document.querySelector('.quota-card');
+            const quotaReset = document.querySelector('.quota-reset');
+            
+            if (remaining <= 0) {
+                quotaCard.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+                quotaCard.style.boxShadow = '0 10px 40px rgba(239, 68, 68, 0.3)';
+                quotaText.textContent = '今日免费次数已用完';
+                quotaReset.textContent = '请登录获取更多次数或明天再来';
+            } else if (remaining === 1) {
+                quotaCard.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+                quotaCard.style.boxShadow = '0 10px 40px rgba(245, 158, 11, 0.3)';
+                quotaText.textContent = '今日剩余：1/3 次（未登录）';
+                quotaReset.textContent = '还剩最后1次！登录解锁更多！';
+            } else {
+                quotaCard.style.background = 'linear-gradient(135deg, #a855f7 0%, #3b82f6 100%)';
+                quotaCard.style.boxShadow = '0 10px 40px rgba(168, 85, 247, 0.3)';
+                quotaText.textContent = `今日剩余：${remaining}/3 次（未登录）`;
+                quotaReset.textContent = '登录解锁更多次数！';
             }
-        });
-        
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                handleFile(e.target.files[0]);
-            }
-        });
+        }
 
-        function handleFile(file) {
-            const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-            if (!validTypes.includes(file.type)) {
-                showError('请上传 JPG、PNG 或 WEBP 格式的图片');
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const used = guestUsage[today] || 0;
+            if (used >= 3) {
+                alert('今日免费次数已用完，请登录获取更多次数或明天再来！');
                 return;
             }
-            
-            if (file.size > 10 * 1024 * 1024) {
-                showError('图片大小不能超过 10MB');
-                return;
+
+            guestUsage[today] = used + 1;
+            localStorage.setItem('guestUsage', JSON.stringify(guestUsage));
+            updateQuotaDisplay();
+
+            if (used + 1 >= 3) {
+                setTimeout(() => {
+                    alert('今日免费次数已用完！登录解锁更多次数吧！');
+                }, 500);
+            } else if (used + 1 >= 2) {
+                setTimeout(() => {
+                    alert('还剩最后1次免费机会！考虑登录解锁更多吧！');
+                }, 500);
             }
-            
-            currentFile = file;
-            processImage(file, getSelectedBgColor());
+
+            alert('图片已选择！（演示版本，实际处理需要后端）');
         }
 
-        function processImage(file, bgColor) {
-            showProcessing();
-            
-            const formData = new FormData();
-            formData.append('image', file);
-            formData.append('bg_color', bgColor);
-            
-            fetch('/api/remove-bg', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => {
-                        throw new Error(err.error || '处理失败');
-                    });
-                }
-                return response.blob();
-            })
-            .then(blob => {
-                resultBlob = blob;
-                const resultUrl = URL.createObjectURL(blob);
-                const originalUrl = URL.createObjectURL(file);
-                
-                originalImage.src = originalUrl;
-                resultImage.src = resultUrl;
-                
-                if (bgColor === 'transparent') {
-                    resultContainer.classList.add('checkerboard');
-                } else {
-                    resultContainer.classList.remove('checkerboard');
-                    resultContainer.style.backgroundColor = bgColor;
-                }
-                
-                showResult();
-            })
-            .catch(err => {
-                showError(err.message);
-            });
+        function login() {
+            alert('登录功能（演示）\n\n登录后可享受：\n- 每月50次免费\n- 历史记录保存\n- 个人中心');
         }
 
-        function getSelectedBgColor() {
-            const selected = document.querySelector('input[name="bg-color"]:checked');
-            if (selected) {
-                return selected.value;
-            }
-            return customColor.value;
-        }
-
-        document.querySelectorAll('input[name="bg-color"]').forEach(radio => {
-            radio.addEventListener('change', () => {
-                if (currentFile) {
-                    processImage(currentFile, getSelectedBgColor());
-                }
-            });
-        });
-
-        customColor.addEventListener('input', () => {
-            if (currentFile) {
-                processImage(currentFile, customColor.value);
-            }
-        });
-
-        let isDragging = false;
-        
-        function updateSliderPosition(e) {
-            const rect = compareContainer.getBoundingClientRect();
-            let x = (e.clientX || e.touches[0].clientX) - rect.left;
-            x = Math.max(0, Math.min(x, rect.width));
-            const percent = (x / rect.width) * 100;
-            compareContainer.style.setProperty('--position', `${percent}%`);
-        }
-        
-        compareHandle.addEventListener('mousedown', () => isDragging = true);
-        compareHandle.addEventListener('touchstart', () => isDragging = true);
-        
-        document.addEventListener('mouseup', () => isDragging = false);
-        document.addEventListener('touchend', () => isDragging = false);
-        
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) updateSliderPosition(e);
-        });
-        
-        document.addEventListener('touchmove', (e) => {
-            if (isDragging) updateSliderPosition(e);
-        });
-
-        downloadBtn.addEventListener('click', () => {
-            if (resultBlob) {
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(resultBlob);
-                const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-                a.download = `removebg_${timestamp}.png`;
-                a.click();
-            }
-        });
-
-        reuploadBtn.addEventListener('click', () => {
-            resetState();
-        });
-
-        retryBtn.addEventListener('click', () => {
-            if (currentFile) {
-                processImage(currentFile, getSelectedBgColor());
-            } else {
-                resetState();
-            }
-        });
-
-        function showProcessing() {
-            uploadSection.classList.add('hidden');
-            resultSection.classList.add('hidden');
-            errorSection.classList.add('hidden');
-            processingSection.classList.remove('hidden');
-        }
-
-        function showResult() {
-            uploadSection.classList.add('hidden');
-            processingSection.classList.add('hidden');
-            errorSection.classList.add('hidden');
-            resultSection.classList.remove('hidden');
-        }
-
-        function showError(message) {
-            uploadSection.classList.add('hidden');
-            processingSection.classList.add('hidden');
-            resultSection.classList.add('hidden');
-            errorSection.classList.remove('hidden');
-            errorMessage.textContent = message;
-        }
-
-        function resetState() {
-            currentFile = null;
-            resultBlob = null;
-            fileInput.value = '';
-            uploadSection.classList.remove('hidden');
-            processingSection.classList.add('hidden');
-            resultSection.classList.add('hidden');
-            errorSection.classList.add('hidden');
-        }
-
-        function updateBgPickerSelection() {
-            document.querySelectorAll('.bg-picker').forEach(el => {
-                el.classList.remove('border-blue-500');
-                el.classList.add('border-gray-300');
-            });
-            
-            const selected = document.querySelector('input[name="bg-color"]:checked');
-            if (selected && selected.nextElementSibling) {
-                selected.nextElementSibling.classList.remove('border-gray-300');
-                selected.nextElementSibling.classList.add('border-blue-500');
-            }
-        }
-
-        document.querySelectorAll('input[name="bg-color"]').forEach(radio => {
-            radio.addEventListener('change', updateBgPickerSelection);
-        });
-
-        updateBgPickerSelection();
-
-        // ===== Auth.js Integration =====
-        const authContainer = document.getElementById('auth-container');
-        const userInfo = document.getElementById('user-info');
-        const userAvatar = document.getElementById('user-avatar');
-        const userName = document.getElementById('user-name');
-        
-        let currentUser = null;
-
-        async function loadCurrentUser() {
-            try {
-                const response = await fetch('/api/user');
-                const data = await response.json();
-                setUser(data.user);
-            } catch (e) {
-                console.error('Failed to load user:', e);
-                setUser(null);
-            }
-        }
-
-        function setUser(user) {
-            currentUser = user;
-            if (user) {
-                // 隐藏登录链接，显示用户信息
-                const loginLink = authContainer.querySelector('a[href="/api/auth/signin/google"]');
-                if (loginLink) loginLink.classList.add('hidden');
-                userInfo.classList.remove('hidden');
-                userName.textContent = user.name || user.email;
-                if (user.image) {
-                    userAvatar.src = user.image;
-                }
-            } else {
-                loginForm.classList.remove('hidden');
-                userInfo.classList.add('hidden');
-            }
-        }
-
-        // Initialize
-        loadCurrentUser();
+        updateQuotaDisplay();
     </script>
 </body>
 </html>
