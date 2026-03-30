@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useSession, signIn, signOut } from 'next-auth/react'
+import Link from 'next/link'
 import { removeBackground } from '@imgly/background-removal'
+import { addProcessingHistory } from '@/lib/mock-data'
 
 export default function Home() {
   const { data: session, status } = useSession()
@@ -10,6 +12,14 @@ export default function Home() {
   const [processedImage, setProcessedImage] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showSavePrompt, setShowSavePrompt] = useState(false)
+  const [processingInfo, setProcessingInfo] = useState<{
+    filename: string
+    originalSize: number
+    processedSize: number
+    processingTime: number
+    outputFormat: string
+  } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,6 +33,9 @@ export default function Home() {
 
     setError(null)
     setProcessedImage(null)
+    setShowSavePrompt(false)
+    setProcessingInfo(null)
+    
     const reader = new FileReader()
     reader.onload = (event) => {
       setOriginalImage(event.target?.result as string)
@@ -31,10 +44,14 @@ export default function Home() {
   }
 
   const processImage = async () => {
-    if (!originalImage) return
+    if (!originalImage || !fileInputRef.current?.files?.[0]) return
 
+    const file = fileInputRef.current.files[0]
+    const startTime = Date.now()
+    
     setIsProcessing(true)
     setError(null)
+    setShowSavePrompt(false)
 
     try {
       const blob = await (await fetch(originalImage)).blob()
@@ -45,8 +62,32 @@ export default function Home() {
         }
       })
       
+      const processingTime = Date.now() - startTime
       const url = URL.createObjectURL(resultBlob)
       setProcessedImage(url)
+      
+      // 保存处理信息
+      setProcessingInfo({
+        filename: file.name,
+        originalSize: file.size,
+        processedSize: resultBlob.size,
+        processingTime,
+        outputFormat: 'png'
+      })
+      
+      // 如果已登录，自动保存到历史记录
+      if (session?.user?.email) {
+        addProcessingHistory(session.user.email, {
+          originalFilename: file.name,
+          originalSize: file.size,
+          processedSize: resultBlob.size,
+          processingTime,
+          outputFormat: 'png'
+        })
+      } else {
+        // 未登录，显示保存提示
+        setShowSavePrompt(true)
+      }
     } catch (err) {
       console.error('Error:', err)
       setError('处理图片时出错，请重试')
@@ -70,9 +111,20 @@ export default function Home() {
     setOriginalImage(null)
     setProcessedImage(null)
     setError(null)
+    setShowSavePrompt(false)
+    setProcessingInfo(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
+  }
+
+  // 格式化文件大小
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 B'
+    const k = 1024
+    const sizes = ['B', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
   return (
@@ -98,6 +150,9 @@ export default function Home() {
                 <div className="h-10 w-24 bg-gray-200 rounded-lg animate-pulse" />
               ) : session ? (
                 <div className="flex items-center gap-4">
+                  <Link href="/dashboard" className="text-sm font-medium text-purple-600 hover:text-purple-700">
+                    个人中心
+                  </Link>
                   <div className="flex items-center gap-2">
                     {session.user?.image && (
                       <img
@@ -132,6 +187,28 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {!session && (
+          <div className="mb-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl shadow-xl p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">💾</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">登录保存历史记录</h3>
+                  <p className="text-white/80">随时找回之前的图片，管理你的处理记录</p>
+                </div>
+              </div>
+              <button
+                onClick={() => signIn('google')}
+                className="px-6 py-2.5 bg-white text-purple-600 font-medium rounded-xl hover:bg-gray-100 transition-colors"
+              >
+                立即登录
+              </button>
+            </div>
+          </div>
+        )}
+
         {!processedImage ? (
           <div className="text-center">
             <div className="mb-8">
@@ -141,6 +218,11 @@ export default function Home() {
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                 使用 AI 技术，简单、快速、专业的背景移除效果
               </p>
+              {!session && (
+                <p className="text-sm text-purple-600 mt-2">
+                  🎉 无限免费使用！登录可保存历史记录
+                </p>
+              )}
             </div>
 
             {!originalImage ? (
@@ -159,7 +241,7 @@ export default function Home() {
                     点击或拖拽图片到此处
                   </p>
                   <p className="text-sm text-gray-400">
-                    支持 JPG、PNG、WebP 格式
+                    支持 JPG、PNG、WebP 格式 · 无限免费使用
                   </p>
                 </div>
                 <input
@@ -225,6 +307,51 @@ export default function Home() {
               </p>
             </div>
 
+            {processingInfo && (
+              <div className="max-w-2xl mx-auto mb-8 bg-white rounded-2xl shadow-xl p-4">
+                <div className="grid grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500">原始大小</p>
+                    <p className="font-semibold text-gray-900">{formatFileSize(processingInfo.originalSize)}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">处理后大小</p>
+                    <p className="font-semibold text-gray-900">{formatFileSize(processingInfo.processedSize)}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">处理耗时</p>
+                    <p className="font-semibold text-gray-900">{(processingInfo.processingTime / 1000).toFixed(1)}s</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">输出格式</p>
+                    <p className="font-semibold text-gray-900">{processingInfo.outputFormat.toUpperCase()}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {showSavePrompt && !session && (
+              <div className="max-w-2xl mx-auto mb-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl shadow-xl p-6 text-white">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                      <span className="text-2xl">💾</span>
+                    </div>
+                    <div className="text-left">
+                      <h3 className="text-lg font-semibold">想要保存这张图片的处理记录吗？</h3>
+                      <p className="text-white/80">登录后可以随时找回和重新下载</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => signIn('google')}
+                    className="px-6 py-2.5 bg-white text-purple-600 font-medium rounded-xl hover:bg-gray-100 transition-colors"
+                  >
+                    登录保存
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-8">
               <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
                 <div className="p-4 bg-gray-50 border-b border-gray-200">
@@ -277,6 +404,11 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-gray-500">
             © 2025 RemoveBG Pro. 使用 AI 技术，让图片处理更简单。
+            {!session && (
+              <span className="ml-2 text-purple-600">
+                · 登录保存历史记录
+              </span>
+            )}
           </p>
         </div>
       </footer>
