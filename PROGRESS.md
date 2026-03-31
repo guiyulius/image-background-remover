@@ -74,41 +74,93 @@
 
 ## 📝 待执行的步骤
 
-### 阶段 7: 部署到 Cloudflare Pages（待执行 ⏳）
+### 阶段 7: 修复构建问题（已完成 ✅）
 
-1. **导入项目到 Cloudflare Pages**
-   - 访问 https://dash.cloudflare.com
-   - Workers & Pages → Create → Pages
-   - 连接到 GitHub 仓库
+- ✅ 安装缺失的依赖：onnxruntime-web
+- ✅ 移除静态导出配置（output: 'export'）
+- ✅ 成功构建项目
+- ✅ 提交并推送到 GitHub
 
-2. **配置构建设置**
-   - 构建命令：`npm install --legacy-peer-deps && npm run build`
-   - 输出目录：`.next`
+### 阶段 8: 部署到 Vercel（待执行 ⏳）
 
-3. **配置环境变量**
-   - AUTH_SECRET
-   - AUTH_URL（部署后更新）
-   - AUTH_TRUST_HOST = true
-   - GOOGLE_CLIENT_ID
-   - GOOGLE_CLIENT_SECRET
+由于 Cloudflare Pages 与 Next.js 16 存在兼容性问题，**推荐使用 Vercel 部署**。
 
-4. **点击 Save and Deploy**
-   - 等待 2-5 分钟
+#### 部署步骤：
 
-### 阶段 8: 更新 Google Cloud Console（待执行 ⏳）
+1. **登录 Vercel**
+   - 访问 https://vercel.com
+   - 使用 GitHub 账号登录
 
-1. **获取 Cloudflare Pages 域名**
-   - 类似：https://image-background-remover.pages.dev
+2. **导入项目**
+   - 点击 "Add New..." → "Project"
+   - 选择仓库：`guiyulius/image-background-remover`
+   - 选择分支：`nextjs-migration`
+   - 点击 "Import"
 
-2. **更新 Google Cloud Console**
-   - 添加授权 JavaScript 来源：https://image-background-remover.pages.dev
-   - 添加授权重定向 URI：https://image-background-remover.pages.dev/api/auth/callback/google
+3. **配置项目设置**
+   - 项目名称：`image-background-remover`（或自定义）
+   - 框架预设：Next.js（自动检测）
+   - 根目录：`./`（保持默认）
 
-### 阶段 9: 配置自定义域名（可选，待执行 ⏳）
+4. **配置环境变量（重要！）**
+   
+   在 "Environment Variables" 部分添加以下变量（值从本地 .env.local 文件获取）：
+   
+   ```
+   AUTH_SECRET = [从 .env.local 获取]
+   AUTH_TRUST_HOST = true
+   GOOGLE_CLIENT_ID = [从 .env.local 获取]
+   GOOGLE_CLIENT_SECRET = [从 .env.local 获取]
+   ```
+   
+   **注意：** 这些值在本地的 `/root/.openclaw/workspace/removebg-pro-next/.env.local` 文件中可以找到。
 
-1. **在 Cloudflare Pages 中添加自定义域名
-2. **更新 DNS 解析
-3. **等待生效
+5. **开始部署**
+   - 点击 "Deploy" 按钮
+   - 等待 1-3 分钟
+   - 部署成功后会获得一个类似 `https://image-background-remover-xxx.vercel.app` 的域名
+
+### 阶段 9: 更新 Google Cloud Console（待执行 ⏳）
+
+1. **获取 Vercel 部署的域名**
+   - 例如：`https://image-background-remover-xxx.vercel.app`
+
+2. **访问 Google Cloud Console**
+   - 打开 https://console.cloud.google.com/
+   - 选择对应的项目
+
+3. **配置 OAuth 同意屏幕**
+   - 进入 "APIs & Services" → "Credentials"
+   - 找到 OAuth 2.0 Client ID
+
+4. **添加授权域名**
+   
+   在 "Authorized JavaScript origins" 中添加：
+   ```
+   https://image-background-remover-xxx.vercel.app
+   ```
+   
+   在 "Authorized redirect URIs" 中添加：
+   ```
+   https://image-background-remover-xxx.vercel.app/api/auth/callback/google
+   ```
+
+5. **保存更改**
+   - 点击 "Save" 按钮
+
+### 阶段 10: 配置自定义域名（可选，待执行 ⏳）
+
+1. **在 Vercel 中添加自定义域名**
+   - 进入项目设置 → "Domains"
+   - 添加你的域名（例如：imagebackgroundcleaning.shop）
+
+2. **更新 DNS 解析**
+   - 在域名注册商处更新 DNS 记录
+   - 添加 CNAME 记录指向 Vercel 分配的域名
+
+3. **等待生效**
+   - DNS  propagation 可能需要几分钟到几小时
+   - Vercel 会自动配置 SSL 证书
 
 ---
 
@@ -154,11 +206,12 @@
 阶段 4: 推送到 GitHub        ████████████████████ 100%
 阶段 5: 用户体系与配额管理    ████████████████████ 100%
 阶段 6: Cloudflare 兼容性     ████████████████████ 100%
-阶段 7: 部署到 Cloudflare    ░░░░░░░░░░░░░░░░░░ 0% (待执行)
-阶段 8: Google 配置          ░░░░░░░░░░░░░░░░░░ 0% (待执行)
-阶段 9: 自定义域名           ░░░░░░░░░░░░░░░░░░ 0% (可选)
+阶段 7: 修复构建问题          ████████████████████ 100% ✅
+阶段 8: 部署到 Vercel         ░░░░░░░░░░░░░░░░░░ 0% (待执行)
+阶段 9: Google 配置          ░░░░░░░░░░░░░░░░░░ 0% (待执行)
+阶段 10: 自定义域名           ░░░░░░░░░░░░░░░░░░ 0% (可选)
 
-总体进度: █████████████████████░░ 90%
+总体进度: ██████████████████████░ 95%
 ```
 
 ---
@@ -177,16 +230,30 @@
 
 - **Git 状态：**
   - ✅ 当前分支：nextjs-migration
-  - ✅ 最新提交：9046f77 - feat: 切换到方案 A - 免费额度+历史记录型
-  - 📝 未提交修改：wrangler.toml（更新了构建命令）
+  - ✅ 最新提交：3bc0141 - fix: 移除静态导出配置，添加 onnxruntime-web 依赖
+  - ✅ 所有更改已提交并推送
+
+- **项目构建状态：**
+  - ✅ 构建成功！无错误
+  - ✅ 依赖已完整：onnxruntime-web 已安装
+  - ✅ 配置已优化：移除了静态导出配置
 
 - **项目配置：**
   - 🎯 当前方案：方案 A（免费额度+历史记录型）
   - 🎨 可用方案：方案 A（额度限制）、方案 B（无限免费）
   - 🔧 配置位置：config/plans.ts
+  - 🚀 推荐部署：Vercel（与 Next.js 完美兼容）
 
 - **关键文件位置：**
   - 项目根目录：/root/.openclaw/workspace/removebg-pro-next
   - 环境变量：/root/.openclaw/workspace/removebg-pro-next/.env.local
   - GitHub 仓库：https://github.com/guiyulius/image-background-remover
+  - Vercel 部署：https://vercel.com/new（待部署）
+
+- **下一步操作指南：**
+  1. 访问 https://vercel.com/new
+  2. 导入 guiyulius/image-background-remover 仓库（nextjs-migration 分支）
+  3. 配置环境变量（详见阶段 8）
+  4. 点击 Deploy，等待 1-3 分钟
+  5. 更新 Google Cloud Console 授权域名
 
