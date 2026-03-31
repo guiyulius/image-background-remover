@@ -1,3 +1,5 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { getOrCreateUserProfile, updateUserProfile } from '@/lib/mock-data'
