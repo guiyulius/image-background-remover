@@ -6,9 +6,10 @@
     "dev": "next dev -H 0.0.0.0 -p 3000",
     "build": "next build",
     "build:cf": "npm install --legacy-peer-deps && next build",
+    "pages:build": "npm install --legacy-peer-deps && npx @cloudflare/next-on-pages",
+    "cf-build": "npm install --legacy-peer-deps && npx @cloudflare/next-on-pages",
     "start": "next start -H 0.0.0.0 -p 3000",
     "lint": "eslint",
-    "pages:build": "npx @cloudflare/next-on-pages",
     "preview": "npm run pages:build && wrangler pages dev",
     "deploy": "npm run pages:build && wrangler pages deploy"
   },
